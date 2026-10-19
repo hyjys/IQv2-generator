@@ -4,7 +4,11 @@
   "description": "Offline IQv2 authoring, validation and print studio for Akademiya",
   "private": true,
   "main": "electron/main.cjs",
-  "author": "hyjys",
+  "author": {
+    "name": "hyjys",
+    "email": "180629309+hyjys@users.noreply.github.com",
+    "url": "https://github.com/hyjys"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -24,10 +28,11 @@
     "cli": "node scripts/iqv2.cjs",
     "dist": "npm run build && electron-builder --publish never",
     "pack": "npm run build && electron-builder --dir --publish never",
-    "test:ui": "node tests/ui-smoke.cjs",
-    "test:render": "tsx tests/render-audit-prepare.ts && node tests/render-visual-audit.cjs",
+    "test:ui": "tsx tests/render-audit-prepare.ts && node tests/ui-smoke.cjs",
+    "test:render": "tsx tests/render-audit-prepare.ts && electron tests/render-visual-audit.cjs",
     "predev": "tsx scripts/build-print-assets.ts",
-    "predev:web": "tsx scripts/build-print-assets.ts"
+    "predev:web": "tsx scripts/build-print-assets.ts",
+    "test:services": "node scripts/service-smoke.cjs"
   },
   "build": {
     "appId": "kr.akademiya.iqv2generator",
@@ -54,11 +59,13 @@
         "zip"
       ],
       "icon": "assets/branding/icon.ico",
-      "signExecutable": false
+      "signExecutable": false,
+      "artifactName": "IQv2-Generator-${version}-windows-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "IQv2-Generator-${version}-windows-${arch}-setup.${ext}"
     },
     "mac": {
       "target": [
@@ -66,7 +73,8 @@
         "zip"
       ],
       "category": "public.app-category.education",
-      "icon": "assets/branding/icon.icns"
+      "icon": "assets/branding/icon.icns",
+      "artifactName": "IQv2-Generator-${version}-macos-${arch}.${ext}"
     },
     "linux": {
       "target": [
@@ -74,8 +82,11 @@
         "deb"
       ],
       "category": "Education",
-      "icon": "assets/branding/icon.png"
-    }
+      "icon": "assets/branding/icon.png",
+      "artifactName": "IQv2-Generator-${version}-linux-${arch}.${ext}"
+    },
+    "artifactName": "IQv2-Generator-${version}-${os}-${arch}.${ext}",
+    "afterAllArtifactBuild": "scripts/normalize-artifacts.cjs"
   },
   "dependencies": {
     "@fontsource/noto-sans-kr": "5.3.1",
@@ -106,5 +117,6 @@
   },
   "engines": {
     "node": ">=26.0.0"
-  }
+  },
+  "homepage": "https://github.com/hyjys/IQv2-generator#readme"
 }

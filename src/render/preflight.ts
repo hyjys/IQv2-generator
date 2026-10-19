@@ -57,6 +57,11 @@ export async function preflightDocument(document: Document): Promise<PrintPrefli
     const math = node.querySelector('.katex');
     if (math && math.getBoundingClientRect().width > node.getBoundingClientRect().width + 2) add('PRINT_MATH_WIDTH', location(node, `displayMath[${index}]`), '표시 수식이 인쇄 열 너비를 넘습니다. aligned 등으로 수식을 나누세요.');
   });
+  document.querySelectorAll<HTMLElement>('.katex').forEach((node, index) => {
+    if (node.closest('.katex-display')) return;
+    const container = node.closest('p,td,th,.iq-prompt,.iq-box,.iq-question,.iq-solution,.iq-passage-body');
+    if (container && node.getBoundingClientRect().width > container.getBoundingClientRect().width + 2) add('PRINT_MATH_WIDTH', location(node, `inlineMath[${index}]`), '본문 수식이 실제 텍스트 열 너비를 넘습니다. 표시 수식이나 aligned로 나누세요.');
+  });
   return issues;
 }
 

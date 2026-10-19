@@ -20,6 +20,7 @@ const MAX_IMAGE = 20 * 1024 * 1024;
 const MAX_HTML = 200 * 1024 * 1024;
 const grantedPaths = new Set();
 let mainWindow;
+let defaultMenu;
 let smokeFiles;
 let pdfRunning = false;
 
@@ -235,8 +236,7 @@ async function createWindow() {
   });
   secureWindow(mainWindow);
   if (process.platform === 'darwin') {
-    const localMenu = Menu.getApplicationMenu();
-    mainWindow.on('focus', () => { if (localMenu) Menu.setApplicationMenu(localMenu); });
+    mainWindow.on('focus', () => { if (defaultMenu) Menu.setApplicationMenu(defaultMenu); });
   }
   mainWindow.webContents.on('will-prevent-unload', (event) => {
     const choice = dialog.showMessageBoxSync(mainWindow, {
@@ -308,11 +308,12 @@ else {
     }
     secureSession(session.defaultSession);
     registerIPC();
-    Menu.setApplicationMenu(Menu.buildFromTemplate([
+    defaultMenu = Menu.buildFromTemplate([
       ...(process.platform === 'darwin' ? [{ role: 'appMenu' }] : []),
       { label: '편집', submenu: [{ role: 'undo' }, { role: 'redo' }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }] },
       { label: '보기', submenu: [{ role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }, { role: 'togglefullscreen' }, ...(!app.isPackaged ? [{ role: 'toggleDevTools' }] : [])] },
-    ]));
+    ]);
+    Menu.setApplicationMenu(defaultMenu);
     if (isSmoke) await smokeTest();
     else await createWindow();
     app.on('activate', () => { if (!mainWindow) createWindow().catch(console.error); });

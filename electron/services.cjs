@@ -154,6 +154,7 @@ function wireWindow(win, state) {
       { type: 'separator' },
       { label: '기본 브라우저에서 서비스 홈 열기', click: () => shell.openExternal(state.service.url).catch(error => showError(error.message)) },
       { label: '현재 주소 보기', click: () => showError(contents.getURL()) },
+      { label: '현재 JSON 파일 위치 열기', enabled: Boolean(state.staged), click: () => { if (state.staged) shell.showItemInFolder(state.staged); } },
       { label: '서비스 로그인·사이트 데이터 지우기', click: async () => {
         const answer = await dialog.showMessageBox(win, { type: 'question', message: '이 앱의 Akademiya 서비스 로그인과 사이트 데이터를 지울까요?', detail: '로컬 IQv2 문서와 기본 브라우저의 로그인은 영향을 받지 않습니다.', buttons: ['취소', '지우기'], defaultId: 0, cancelId: 0, noLink: true });
         if (answer.response === 1) { await contents.session.clearStorageData(); await contents.session.clearCache(); contents.reload(); }

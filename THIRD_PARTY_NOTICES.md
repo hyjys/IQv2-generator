@@ -7,6 +7,7 @@ User-requested source extraction from the local Akademiya checkout, repository `
 - `src/core/vendor/`: shared IQv2 types, media helpers and canonical validator. Exact source paths and SHA-256 values are in `src/core/vendor/PROVENANCE.md`.
 - `src/render/markdown.ts`: the canonical ImsiQuiz Markdown implementation. Media projection and print layout are adaptations described in `src/render/PROVENANCE.md`.
 - `src/styles/imsiquiz-theme.css`: original `imsiquiz/src/shared/themes.css`, retained as an independent source file.
+- `assets/branding/`: original ImsiQuiz logo plus PNG/ICO/ICNS app icons; source hash and conversion details are in its PROVENANCE.md.
 - `resources/skills/`: snapshots of the explicitly requested `iqv2-generator`, `mockmocktest`, and `mockschooltest` skills and their references.
 
 The owner explicitly requested an independent public open-source distribution of these sources. This project's source distribution uses the MIT license in root `LICENSE`. External libraries and fonts retain their own licenses; trademark/brand ownership remains with the respective owner.

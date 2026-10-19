@@ -90,7 +90,9 @@ npm run dist
 
 `build`는 내장 CJK·KaTeX 자산과 CLI를 먼저 생성한다. `public/render-assets.css`, `public/print-preflight.js`, `dist/`, `electron/cli-bundle.cjs`, `release/`, `artifacts/`는 생성물이며 Git에 넣지 않는다. 글꼴 원본과 라이선스는 Git에 보관한다. npm 라이브러리는 업데이트 전 registry 최신 버전을 확인하고 exact version과 lockfile을 함께 갱신한다. 확인한 버전은 `dependency-versions.json`이다. global-agent 4.1.3 override는 electron-builder의 취약한 roarr/sprintf-js 전이 경로를 제거하기 위한 것으로, override 변경 시 패키징·감사를 다시 수행한다.
 
-`.github/workflows/desktop.yml`은 Windows x64, macOS x64/arm64, Linux x64에서 검증하고 NSIS/ZIP, DMG/ZIP, AppImage/DEB를 만든다. `v*` 태그에서는 세 작업 모두 성공한 뒤 GitHub Release와 SHA256SUMS.txt를 게시한다. 서명 인증서는 포함하지 않으며 자동 업데이트는 없다. 버전 변경은 package.json과 lockfile, UI 표시, 본 문서·릴리스 정보를 함께 갱신한다. CI 완료 여부와 아티팩트를 직접 확인한 뒤 해당 플랫폼 검증을 보고한다.
+`.github/workflows/desktop.yml`은 Windows·macOS·Linux Ubuntu 26.04의 x64/arm64 여섯 네이티브 runner에서 검증하고 NSIS/ZIP, DMG/ZIP, AppImage/DEB를 만든다. `v*` 태그에서는 여섯 작업 모두 성공하고 각 OS/arch의 두 배포 파일이 존재하는지 확인한 뒤 GitHub Release와 SHA256SUMS.txt를 게시한다. 서명 인증서는 포함하지 않으며 자동 업데이트는 없다. 버전 변경은 package.json과 lockfile, 본 문서·릴리스 정보를 함께 갱신한다. UI 버전은 package.json을 읽는다. CI 완료 여부와 아티팩트를 직접 확인한 뒤 해당 플랫폼 검증을 보고한다.
+
+파일명은 `IQv2-Generator-${version}-${platform}-${arch}.${ext}`이며 NSIS는 `-setup.exe`로 끝난다. platform은 `windows|macos|linux`, arch는 `x64|arm64`로 고정한다. electron-builder가 Linux 확장자에 따라 x64를 `x86_64`·`amd64`로 확장하므로 `scripts/normalize-artifacts.cjs`의 afterAllArtifactBuild 훅이 실제 파일명을 x64로 통일한다. DEB 내부 아키텍처 메타데이터는 배포 표준을 유지한다. Release 게시 전에 OS/arch별 두 파일, 합계 12개가 정확히 있는지 검사한다.
 
 ## 주요 파일 API
 

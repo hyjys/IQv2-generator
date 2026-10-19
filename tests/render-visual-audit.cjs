@@ -43,6 +43,9 @@ app.whenReady().then(async () => {
       await win.webContents.executeJavaScript("document.querySelector('[data-diagram-text]').setAttribute('x','395')");
       const rejected = await win.webContents.executeJavaScriptInIsolatedWorld(999, [{ code: await fs.readFile(path.join(root, 'preflight.js'), 'utf8') }]);
       assert.ok(rejected.some(issue => issue.code === 'PRINT_DIAGRAM_CLIP' && issue.path === 'questions[0].media[3].elements[2]'), JSON.stringify(rejected));
+      await win.webContents.executeJavaScript("document.querySelector('.iq-passage-body .katex').style.cssText='display:inline-block;width:9999px'");
+      const mathRejected = await win.webContents.executeJavaScriptInIsolatedWorld(999, [{ code: await fs.readFile(path.join(root, 'preflight.js'), 'utf8') }]);
+      assert.ok(mathRejected.some(issue => issue.code === 'PRINT_MATH_WIDTH'), JSON.stringify(mathRejected));
     }
     if (external.length || result.errors.length || result.width > result.clientWidth) throw new Error(JSON.stringify({ mode, external, ...result }));
     if (!result.fonts.some(font => font.includes('Noto Sans CJK KR')) || !result.fonts.some(font => font.includes('Noto Serif CJK KR'))) throw new Error('Bundled fonts did not load.');

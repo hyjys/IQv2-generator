@@ -19,12 +19,21 @@ jobs:
           - os: windows-latest
             target: --win --x64
             artifact: windows-x64
+          - os: windows-11-vs2026-arm
+            target: --win --arm64
+            artifact: windows-arm64
+          - os: macos-26-intel
+            target: --mac --x64
+            artifact: macos-x64
           - os: macos-latest
-            target: --mac --x64 --arm64
-            artifact: macos-universal-targets
-          - os: ubuntu-24.04
+            target: --mac --arm64
+            artifact: macos-arm64
+          - os: ubuntu-26.04
             target: --linux --x64
             artifact: linux-x64
+          - os: ubuntu-26.04-arm
+            target: --linux --arm64
+            artifact: linux-arm64
     runs-on: ${{ matrix.os }}
     env:
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
@@ -52,6 +61,12 @@ jobs:
       - name: Test Electron with virtual Linux display
         if: runner.os == 'Linux'
         run: xvfb-run -a npm run test:desktop
+      - name: Test isolated service browser and user-confirmed JSON selection
+        if: runner.os != 'Linux'
+        run: npm run test:services
+      - name: Test service browser with virtual Linux display
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm run test:services
       - name: Create native packages
         run: npx electron-builder ${{ matrix.target }} --publish never
       - name: Upload installers and portable archives
@@ -74,11 +89,19 @@ jobs:
           path: artifacts/desktop-smoke/
           if-no-files-found: ignore
           retention-days: 7
+      - name: Upload service browser evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: services-${{ matrix.artifact }}
+          path: artifacts/service-smoke/
+          if-no-files-found: ignore
+          retention-days: 7
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: desktop
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
     steps:
@@ -102,6 +125,12 @@ jobs:
           files = sorted(p for p in root.iterdir() if p.is_file())
           if not files:
               raise SystemExit('No installers were downloaded')
+          for platform, extensions in {'windows': ['exe', 'zip'], 'macos': ['dmg', 'zip'], 'linux': ['AppImage', 'deb']}.items():
+              for architecture in ('x64', 'arm64'):
+                  for extension in extensions:
+                      matches = [p for p in files if f'-{platform}-{architecture}' in p.name and p.suffix == f'.{extension}']
+                      if len(matches) != 1:
+                          raise SystemExit(f'Expected one {platform}/{architecture}/{extension}, found {len(matches)}')
           with (root / 'SHA256SUMS.txt').open('w', encoding='utf-8') as output:
               for file in files:
                   digest = sha256()

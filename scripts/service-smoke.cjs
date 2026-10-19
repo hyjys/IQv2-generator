@@ -22,7 +22,7 @@ async function main() {
         globalThis.__serviceSmoke.requests.push({ method: request.method, url: request.url });
         return new Response(fixture, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
       });
-      dialog.showMessageBox = async () => { globalThis.__serviceSmoke.confirmations++; return { response: globalThis.__serviceSmoke.response, checkboxChecked: false }; };
+      dialog.showMessageBox = async (_win, options) => { globalThis.__serviceSmoke.confirmations++; globalThis.__serviceSmoke.lastMessage = options.message; return { response: globalThis.__serviceSmoke.response, checkboxChecked: false }; };
       dialog.showOpenDialog = async () => { globalThis.__serviceSmoke.fileDialogs++; return { canceled: true, filePaths: [] }; };
     });
     const text = JSON.stringify({ schemaVersion: '2.0', kind: 'quiz', meta: { title: '서비스 선택 테스트' }, questions: [{ number: 1, points: 2, type: '5지선다', prompt: '2+2는?', choices: ['1', '2', '3', '4', '5'], answer: 4, explanation: { correct: '2+2=4이다.' } }] });
@@ -30,8 +30,16 @@ async function main() {
     const opened = await editor.evaluate(text => window.desktop.openService({ service: 'imsiquiz', text }), text);
     assert.equal(opened.staged, true);
     const remote = await next;
+    remote.on('pageerror', error => process.stderr.write(`Service fixture page error: ${error.message}\n`));
     await remote.waitForSelector('#upload');
     await remote.waitForTimeout(250);
+    // Playwright initializes its own CDP session with chooser interception off.
+    // Restore the application's already-installed interception after that setup.
+    await instance.evaluate(async ({ BrowserWindow }) => {
+      const win = BrowserWindow.getAllWindows().find(win => win.webContents.getURL().startsWith('https://iq.akademiya.kr/'));
+      if (!win.webContents.debugger.isAttached()) throw new Error('Application chooser debugger did not attach.');
+      await win.webContents.debugger.sendCommand('Page.setInterceptFileChooserDialog', { enabled: true });
+    });
     const isolation = await remote.evaluate(() => ({ node: typeof require, bridge: typeof window.desktop, url: location.href, selected: window.selectedCount }));
     assert.equal(isolation.node, 'undefined'); assert.equal(isolation.bridge, 'undefined'); assert.equal(isolation.selected, 0);
     checks.push('remote-no-node-or-preload', 'no-selection-before-user-click');
@@ -40,6 +48,7 @@ async function main() {
     assert.equal(await remote.evaluate(() => window.selectedContent), text);
     assert.equal(await remote.evaluate(() => window.selectedName), 'current-iqv2.json');
     checks.push('user-triggered-json-selection', 'staged-content-exact');
+    await remote.evaluate(() => { document.querySelector('#upload').value = ''; });
     await instance.evaluate(() => { globalThis.__serviceSmoke.response = 2; });
     await remote.locator('#upload').click();
     await remote.waitForFunction(() => document.querySelector('#upload').files.length === 0);
