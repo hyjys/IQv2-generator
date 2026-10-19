@@ -46,7 +46,7 @@ html,body { margin:0; padding:0; background:white; color:#1f2937; }
 .iq-answer-grid > div { display:flex; border:1px solid #ddd6fe; min-width:0; }
 .iq-answer-grid span { background:#f5f3ff; padding:1.5mm; text-align:center; min-width:7mm; }
 .iq-answer-grid strong { flex:1; padding:1.5mm; text-align:center; }
-.iq-solution { margin-bottom:5mm; }
+.iq-solution { margin-bottom:5mm; break-inside:avoid; }
 .iq-solution h3 { margin:0 0 2mm; font-size:10pt; break-after:avoid; }
 .iq-answer { color:#6d28d9; }
 .iq-intent { font-weight:700; }

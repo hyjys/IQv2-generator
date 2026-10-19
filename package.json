@@ -23,7 +23,11 @@
     "test:desktop": "node scripts/desktop-smoke.cjs",
     "cli": "node scripts/iqv2.cjs",
     "dist": "npm run build && electron-builder --publish never",
-    "pack": "npm run build && electron-builder --dir --publish never"
+    "pack": "npm run build && electron-builder --dir --publish never",
+    "test:ui": "node tests/ui-smoke.cjs",
+    "test:render": "tsx tests/render-audit-prepare.ts && node tests/render-visual-audit.cjs",
+    "predev": "tsx scripts/build-print-assets.ts",
+    "predev:web": "tsx scripts/build-print-assets.ts"
   },
   "build": {
     "appId": "kr.akademiya.iqv2generator",
@@ -44,19 +48,13 @@
       "THIRD_PARTY_NOTICES.md",
       "AKADEMIYA_AI_INTEGRATION.md"
     ],
-    "fileAssociations": [
-      {
-        "ext": "iqv2",
-        "name": "IQv2 document",
-        "role": "Editor"
-      }
-    ],
     "win": {
       "target": [
         "nsis",
         "zip"
       ],
-      "signAndEditExecutable": false
+      "icon": "assets/branding/icon.ico",
+      "signExecutable": false
     },
     "nsis": {
       "oneClick": false,
@@ -67,14 +65,16 @@
         "dmg",
         "zip"
       ],
-      "category": "public.app-category.education"
+      "category": "public.app-category.education",
+      "icon": "assets/branding/icon.icns"
     },
     "linux": {
       "target": [
         "AppImage",
         "deb"
       ],
-      "category": "Education"
+      "category": "Education",
+      "icon": "assets/branding/icon.png"
     }
   },
   "dependencies": {

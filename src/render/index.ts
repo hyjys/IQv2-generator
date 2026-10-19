@@ -57,10 +57,10 @@ export function renderMedia(media: unknown, sourcePath = 'media'): string {
       return `<figure class="iq-media iq-shape" data-media-kind="shape"><svg viewBox="0 0 100 100" width="${Math.max(32, Math.min(800, number(block.width, 160)))}" height="${Math.max(32, Math.min(500, number(block.height, 110)))}" role="img" aria-label="${escapeHtml(block.label ?? block.shape)}">${shape}</svg>${block.label ? `<figcaption>${inline(block.label)}</figcaption>` : ''}</figure>`;
     }
     if (block.type === 'diagram') {
-      const elements = list(block.elements).slice(0, 300).map(element => {
+      const elements = list(block.elements).slice(0, 300).map((element, elementIndex) => {
         const stroke = color(element.stroke, '#1f2937'); const fill = color(element.fill, 'none');
-        const style = `stroke="${stroke}" fill="${fill}" stroke-width="${number(element.strokeWidth, 1.5)}"`;
-        if (element.type === 'text') return `<text data-diagram-text="true" x="${number(element.x)}" y="${number(element.y)}" font-size="${number(element.fontSize, 16)}" text-anchor="${['start', 'middle', 'end'].includes(element.anchor) ? element.anchor : 'start'}" fill="${color(element.fill, '#1f2937') === 'none' ? '#1f2937' : color(element.fill, '#1f2937')}">${escapeHtml(element.text)}</text>`;
+        const style = `data-diagram-element-index="${elementIndex}" stroke="${stroke}" fill="${fill}" stroke-width="${number(element.strokeWidth, 1.5)}"`;
+        if (element.type === 'text') return `<text data-diagram-text="true" data-diagram-element-index="${elementIndex}" x="${number(element.x)}" y="${number(element.y)}" font-size="${number(element.fontSize, 16)}" text-anchor="${['start', 'middle', 'end'].includes(element.anchor) ? element.anchor : 'start'}" fill="${color(element.fill, '#1f2937') === 'none' ? '#1f2937' : color(element.fill, '#1f2937')}">${escapeHtml(element.text)}</text>`;
         if (element.type === 'line' || element.type === 'arrow') {
           const x1 = number(element.x1); const x2 = number(element.x2); const y1 = number(element.y1); const y2 = number(element.y2);
           const angle = Math.atan2(y2 - y1, x2 - x1); const head = (sign: number) => `${x2 - 9 * Math.cos(angle + sign * Math.PI / 6)},${y2 - 9 * Math.sin(angle + sign * Math.PI / 6)}`;

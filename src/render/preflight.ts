@@ -31,15 +31,17 @@ export async function preflightDocument(document: Document): Promise<PrintPrefli
     Array.from(svg.children).forEach((node, elementIndex) => {
       if (!('getBBox' in node)) return;
       const element = node as SVGGraphicsElement;
+      const sourceIndex = element.getAttribute('data-diagram-element-index') ?? String(elementIndex);
+      const elementPath = `${path}.elements[${sourceIndex}]`;
       try {
         const box = element.getBBox();
         const stroke = Number.parseFloat(getComputedStyle(element).strokeWidth) || 0;
         const edge = element.tagName.toLowerCase() === 'text' ? 0 : stroke / 2;
         if (box.x - edge < view.x + padding || box.y - edge < view.y + padding || box.x + box.width + edge > view.x + view.width - padding || box.y + box.height + edge > view.y + view.height - padding) {
           const label = element.tagName.toLowerCase() === 'text' ? `글자 “${element.textContent?.slice(0, 45)}”` : `도형 요소 ${elementIndex + 1}`;
-          add('PRINT_DIAGRAM_CLIP', `${path}.elements[${elementIndex}]`, `${label}의 실제 Noto CJK 경계가 도형 안쪽 8px 여백을 넘습니다. 좌표·글자 크기 또는 도형 크기를 조정하세요.`);
+          add('PRINT_DIAGRAM_CLIP', elementPath, `${label}의 실제 Noto CJK 경계가 도형 안쪽 8px 여백을 넘습니다. 좌표·글자 크기 또는 도형 크기를 조정하세요.`);
         }
-      } catch { add('PRINT_DIAGRAM', `${path}.elements[${elementIndex}]`, '도형 요소의 실제 경계를 측정할 수 없습니다.'); }
+      } catch { add('PRINT_DIAGRAM', elementPath, '도형 요소의 실제 경계를 측정할 수 없습니다.'); }
     });
   });
   // Convert physical print units through Chromium's own CSS pixel measurement.
@@ -58,4 +60,6 @@ export async function preflightDocument(document: Document): Promise<PrintPrefli
   return issues;
 }
 
-export const printPreflightScript = `(${preflightDocument.toString()})(document)`;
+// tsx/esbuild may preserve inner function names with its __name helper. Supply
+// that harmless helper inside the isolated expression as well.
+export const printPreflightScript = `(async()=>{const __name=(target)=>target;return (${preflightDocument.toString()})(document)})()`;

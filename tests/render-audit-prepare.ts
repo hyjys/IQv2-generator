@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createTemplate, validateDocument } from '../src/core/index.js';
 import { renderOfflineDocument } from '../src/render/assets.js';
-import { validateRenderDocument } from '../src/render/index.js';
+import { validateRenderDocument, printPreflightScript } from '../src/render/index.js';
 
 async function main() {
 const doc = createTemplate('mockschool');
@@ -15,7 +15,7 @@ doc.questions![0].media = [
   { type: 'math', latex: String.raw`\int_0^1 x^2\,dx=\frac{1}{3}` },
   { type: 'table', headers: ['항목', '수치'], rows: [['가', '$-2$'], ['나', '$3$']], caption: '관찰한 수치' },
   { type: 'graph', graphType: 'bar', title: '양수·음수 값 비교', points: [{ label: '가', value: -2 }, { label: '나', value: 3 }, { label: '다', value: 1 }] },
-  { type: 'diagram', width: 400, height: 220, caption: '축과 실험 구간', elements: [{ type: 'arrow', x1: 40, y1: 180, x2: 350, y2: 180 }, { type: 'arrow', x1: 40, y1: 180, x2: 40, y2: 35 }, { type: 'text', x: 28, y: 22, text: '농도', fontSize: 18 }, { type: 'text', x: 350, y: 210, text: '시간', fontSize: 18, anchor: 'end' }, { type: 'circle', cx: 180, cy: 90, r: 22 }, { type: 'text', x: 180, y: 95, text: 'A', fontSize: 16, anchor: 'middle' }] },
+  { type: 'diagram', width: 400, height: 220, caption: '축과 실험 구간', elements: [{ type: 'arrow', x1: 40, y1: 180, x2: 350, y2: 180 }, { type: 'arrow', x1: 40, y1: 180, x2: 40, y2: 35 }, { type: 'text', x: 28, y: 36, text: '농도', fontSize: 18 }, { type: 'text', x: 350, y: 204, text: '시간', fontSize: 18, anchor: 'end' }, { type: 'circle', cx: 180, cy: 90, r: 22 }, { type: 'text', x: 180, y: 95, text: 'A', fontSize: 16, anchor: 'middle' }] },
 ];
 doc.questions![0].choiceMedia = [[], [{ type: 'shape', shape: 'triangle', label: '보기 도형', width: 100, height: 80 }], [], [], []];
 doc.questions![0].explanation.media = [{ type: 'graph', graphType: 'line', title: '해설용 변화 추이', points: [{ label: '처음', value: 0 }, { label: '중간', value: 3 }, { label: '끝', value: 1 }] }];
@@ -24,6 +24,7 @@ const report = validateDocument(doc); const math = validateRenderDocument(doc);
 if (report.issues.some(issue => issue.severity === 'error') || math.length) throw new Error(JSON.stringify({ report, math }));
 const directory = path.resolve('artifacts/render-audit'); await mkdir(directory, { recursive: true });
 await writeFile(path.join(directory, 'rich.iqv2.json'), JSON.stringify(doc, null, 2), 'utf8');
+await writeFile(path.join(directory, 'preflight.js'), printPreflightScript, 'utf8');
 for (const mode of ['questions', 'answers'] as const) await writeFile(path.join(directory, `${mode}.html`), renderOfflineDocument(doc, mode, process.cwd()), 'utf8');
 console.log(`Prepared rich question/answer documents in ${directory}`);
 }

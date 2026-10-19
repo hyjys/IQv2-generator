@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld('desktop', Object.freeze({
   chooseImage: () => ipcRenderer.invoke('image:open'),
   exportPdf: (options) => ipcRenderer.invoke('document:pdf', options),
   appInfo: () => ipcRenderer.invoke('app:info'),
+  openService: (options) => ipcRenderer.invoke('service:open', options),
 }));

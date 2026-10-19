@@ -1,6 +1,6 @@
 {
   "revision": "f8d157532fbfaeda587e826d4cd5b21a49186f7c",
-  "conversion": "fontTools 4.66.0; WOFF2 lossless wrapper; full glyph sets retained",
+  "conversion": "fontTools 4.66.0 WOFF2; full glyph sets, metrics, GSUB/locl and cmap/IVS retained; fontTools metadata normalization allowed",
   "fonts": [
     {
       "file": "NotoSansCJKkr-Regular.woff2",

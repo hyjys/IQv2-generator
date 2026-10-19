@@ -2,6 +2,7 @@
 const { app, BrowserWindow } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const assert = require('node:assert/strict');
 app.on('window-all-closed', () => {});
 
 app.whenReady().then(async () => {
@@ -34,11 +35,18 @@ app.whenReady().then(async () => {
       languageOverrideSupported:CSS.supports('font-language-override','"JAN"')};
     })()`);
     const pdf = await win.webContents.printToPDF({ printBackground: true, pageSize: 'A4', preferCSSPageSize: true, generateTaggedPDF: true });
+    const preflight = await win.webContents.executeJavaScriptInIsolatedWorld(999, [{ code: await fs.readFile(path.join(root, 'preflight.js'), 'utf8') }]);
+    if (preflight.length) throw new Error(JSON.stringify({mode,preflight}));
     await fs.writeFile(path.join(root, `${mode}.pdf`), pdf);
     const screenshot = await win.webContents.capturePage(); await fs.writeFile(path.join(root, `${mode}.png`), screenshot.toPNG());
+    if (mode === 'questions') {
+      await win.webContents.executeJavaScript("document.querySelector('[data-diagram-text]').setAttribute('x','395')");
+      const rejected = await win.webContents.executeJavaScriptInIsolatedWorld(999, [{ code: await fs.readFile(path.join(root, 'preflight.js'), 'utf8') }]);
+      assert.ok(rejected.some(issue => issue.code === 'PRINT_DIAGRAM_CLIP' && issue.path === 'questions[0].media[3].elements[2]'), JSON.stringify(rejected));
+    }
     if (external.length || result.errors.length || result.width > result.clientWidth) throw new Error(JSON.stringify({ mode, external, ...result }));
     if (!result.fonts.some(font => font.includes('Noto Sans CJK KR')) || !result.fonts.some(font => font.includes('Noto Serif CJK KR'))) throw new Error('Bundled fonts did not load.');
-    reports.push({ mode, pdfBytes: pdf.length, externalRequests: external.length, ...result });
+    reports.push({ mode, pdfBytes: pdf.length, externalRequests: external.length, preflight, ...result });
     win.destroy();
   }
   const report = { passed: true, platform: process.platform, electron: process.versions.electron, reports };

@@ -96,6 +96,7 @@ async function readValidated(filename: string, context: CliContext) {
   if (report.document && report.valid) {
     report.issues.push(...validateRenderDocument(report.document).map(issue => ({ ...issue, severity: 'error' as const })));
     const imageIssues = await validateRasterDecoding(report.document, context.decodeRaster || nodeRasterDecoder);
+    report.issues = report.issues.filter(issue => issue.code !== 'PIXEL_DECODE_REQUIRED');
     report.issues.push(...imageIssues);
     report.valid = !report.issues.some(issue => issue.severity === 'error');
   }
@@ -209,8 +210,9 @@ export async function runCli(args: string[], context: CliContext = {}): Promise<
     return 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (json) stdout(`${JSON.stringify({ ok: false, error: { code: 'CLI_ERROR', message } })}\n`);
+    const printFailure = error && typeof error === 'object' && 'code' in error && error.code === 'PRINT_PREFLIGHT' && 'issues' in error && Array.isArray(error.issues);
+    if (json) stdout(`${JSON.stringify({ ok: false, error: { code: printFailure ? 'PRINT_PREFLIGHT' : 'CLI_ERROR', message }, ...(printFailure ? { issues: error.issues } : {}) })}\n`);
     else stderr(`Error: ${message}\n`);
-    return 2;
+    return printFailure ? 1 : 2;
   }
 }

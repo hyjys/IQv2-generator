@@ -9,5 +9,6 @@ test-results/
 Thumbs.db
 *.tsbuildinfo
 public/render-assets.css
+public/print-preflight.js
 electron/cli-bundle.cjs
 artifacts/

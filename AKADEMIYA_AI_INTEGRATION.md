@@ -11,6 +11,7 @@ upstreamRepository: https://github.com/inoyu4649/Akademiya
 upstreamCommit: 88f7bade7d8004c51f891961d0c6d7930d5185b2
 runtimeRequiresAkademiyaCheckout: false
 runtimeRequiresNetwork: false
+optionalServiceBrowserRequiresNetwork: true
 ---
 
 # Akademiya AI 인수인계 및 스킬 갱신 계약
@@ -61,7 +62,7 @@ node scripts/iqv2.cjs pdf ./work/exam.json --out-dir ./work/pdf --json
 1. JSON 파싱·UTF-8/BOM·문서 크기, 원본 canonical validator, 필수/선택 필드 타입, ID·참조·정답 범위·배점·시험 정책을 검사한다.
 2. 독립 전달 규칙을 추가한다. 외부 URL·파일 경로·서버 종속 `iq://u/...` 이미지는 완전한 PNG/JPEG/WebP data URL로 교체해야 한다. 사진 MIME·base64·파일 구조·한 장 2MiB·합계 8MiB·실제 픽셀 해독을 검사한다. Node CLI는 sharp, GUI는 Chromium, 패키지 CLI는 Electron nativeImage를 사용한다.
 3. 실제 KaTeX 파서로 미디어와 인라인 수식의 오류를 검사한다. Markdown은 허용 CJK lang/ruby 태그 외의 임의 HTML을 실행하지 않는다. 의미 있는 비교에서는 원래 코드 포인트와 IVS를 유지한다.
-4. 도형 좌표·크기·획·화살촉·레이블 여백을 검사한다. 정적 글자 폭 추정은 경고이며, 실제 PDF 경로의 Noto CJK 렌더링과 직접 시각 검토를 함께 사용한다. 시험 문제지와 해설지는 서로 다른 출력이므로 두 파일을 따로 생성하고 확인한다.
+4. 도형 좌표·크기·획·화살촉·레이블 여백을 검사한다. 정적 글자 폭 추정은 경고이며, 실제 PDF 경로는 인쇄 미디어·A4 열 크기와 로드된 Noto CJK의 SVG getBBox를 측정해 8px 여백·페이지 크기·수식 넘침 오류를 차단한다. PRINT_PREFLIGHT 오류는 CLI 종료 1과 구체적 path로 반환한다. 직접 시각 검토도 함께 사용한다. 시험 문제지와 해설지는 서로 다른 출력이므로 두 파일을 따로 생성하고 확인한다.
 5. `CONTENT_REVIEW` 같은 경고는 정답의 사실성, 유일성, 교육과정, 예상 풀이 시간, 듣기 자료, 출처·저작권 검토를 대체하지 못함을 뜻한다. 프로그램이 검증하지 않은 내용을 ‘완벽하게 확인했다’고 표현하지 않는다. 자동 출제 모델/API는 내장하지 않았으며 편집기·스킬·작업 지시서·CLI를 통해 AI 제작을 연결한다.
 
 ## 세 스킬에 반영할 권장 변경
@@ -87,11 +88,15 @@ npm run test:desktop
 npm run dist
 ```
 
-`build`는 내장 CJK·KaTeX 자산과 CLI를 먼저 생성한다. `public/render-assets.css`, `dist/`, `electron/cli-bundle.cjs`, `release/`, `artifacts/`는 생성물이며 Git에 넣지 않는다. 글꼴 원본과 라이선스는 Git에 보관한다. npm 라이브러리는 업데이트 전 registry 최신 버전을 확인하고 exact version과 lockfile을 함께 갱신한다. 확인한 버전은 `dependency-versions.json`이다. global-agent 4.1.3 override는 electron-builder의 취약한 roarr/sprintf-js 전이 경로를 제거하기 위한 것으로, override 변경 시 패키징·감사를 다시 수행한다.
+`build`는 내장 CJK·KaTeX 자산과 CLI를 먼저 생성한다. `public/render-assets.css`, `public/print-preflight.js`, `dist/`, `electron/cli-bundle.cjs`, `release/`, `artifacts/`는 생성물이며 Git에 넣지 않는다. 글꼴 원본과 라이선스는 Git에 보관한다. npm 라이브러리는 업데이트 전 registry 최신 버전을 확인하고 exact version과 lockfile을 함께 갱신한다. 확인한 버전은 `dependency-versions.json`이다. global-agent 4.1.3 override는 electron-builder의 취약한 roarr/sprintf-js 전이 경로를 제거하기 위한 것으로, override 변경 시 패키징·감사를 다시 수행한다.
 
 `.github/workflows/desktop.yml`은 Windows x64, macOS x64/arm64, Linux x64에서 검증하고 NSIS/ZIP, DMG/ZIP, AppImage/DEB를 만든다. `v*` 태그에서는 세 작업 모두 성공한 뒤 GitHub Release와 SHA256SUMS.txt를 게시한다. 서명 인증서는 포함하지 않으며 자동 업데이트는 없다. 버전 변경은 package.json과 lockfile, UI 표시, 본 문서·릴리스 정보를 함께 갱신한다. CI 완료 여부와 아티팩트를 직접 확인한 뒤 해당 플랫폼 검증을 보고한다.
 
 ## 주요 파일 API
+
+선택적인 공식 서비스 브라우저는 `electron/services.cjs`가 담당한다. 접속 목적은 HAFS Tools AI 서버 테마의 PDF와 실제 퀴즈 업로드다. 검증한 경로는 `https://hafs.akademiya.kr/tools/exam-papers`, `https://hafs.akademiya.kr/quiz/?view=create`, `https://iq.akademiya.kr/?view=create`다. `openService({service,text?})`는 고정된 네 목적지만 받는다(`hafstudy`, `exam`, `hafquiz`, `imsiquiz`). 영구 서비스 세션을 로컬 창과 격리하고, HAFStudy 홈과 `/quiz`에는 같은 세션을 쓴다. Chromium이 공식 쿠키·OAuth를 관리하며 토큰을 복사하지 않는다. 원격 창은 preload·Node API를 받지 않는다.
+
+Electron에 존재하지 않는 `select-file` 이벤트를 구현했다고 가정하지 않는다. 실제 파일 전달은 Chromium CDP의 사용자 파일 선택 이벤트와 파일 입력 노드를 확인하는 지원 인터페이스를 사용한다. 단일 JSON 선택기·공식 서비스 origin·사용자 확인 조건을 만족할 때만 앱이 준비한 임시 `.json`을 선택한다. 실제 가져오기·게시·서버 PDF 생성은 원격 사이트에서 사용자가 따로 실행한다. 파일 준비가 업로드 완료를 뜻하지 않는다. Google의 내장 브라우저 OAuth 제한을 User-Agent 변조로 우회하지 않으며, 외부 브라우저는 별개 세션임을 안내한다.
 
 | 위치 | 공개 계약 |
 | --- | --- |

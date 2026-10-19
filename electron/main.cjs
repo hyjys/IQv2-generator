@@ -6,6 +6,8 @@ const { pathToFileURL, fileURLToPath } = require('node:url');
 const assert = require('node:assert/strict');
 
 const ROOT = path.resolve(__dirname, '..');
+app.setName('IQv2 Generator');
+if (process.platform === 'win32') app.setAppUserModelId('kr.akademiya.iqv2generator');
 const DIST = path.join(ROOT, 'dist');
 const ENTRY = pathToFileURL(path.join(DIST, 'index.html')).href;
 const DEV_URL = 'http://127.0.0.1:5173';
@@ -153,6 +155,14 @@ function escapeHtml(value) {
   return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
 }
 
+function withTimeout(promise, milliseconds, label) {
+  let timer;
+  return Promise.race([
+    promise,
+    new Promise((_resolve, reject) => { timer = setTimeout(() => reject(new Error(`${label} 시간이 초과되었습니다. 문서·이미지·글꼴을 확인하세요.`)), milliseconds); }),
+  ]).finally(() => clearTimeout(timer));
+}
+
 async function exportPdf(input, directDestination) {
   if (pdfRunning) throw new Error('PDF를 만드는 중입니다. 완료 후 다시 시도하세요.');
   const options = optionsObject(input);
@@ -178,14 +188,24 @@ async function exportPdf(input, directDestination) {
     const ses = session.fromPartition(`iqv2-print-${crypto.randomUUID()}`);
     secureSession(ses, { pdfFile: temporary });
     printWindow = new BrowserWindow({
-      show: false, width: 900, height: 1200,
+      show: false, width: 704, height: 1010, useContentSize: true,
       webPreferences: { session: ses, nodeIntegration: false, contextIsolation: true, sandbox: true, javascript: false, webSecurity: true, devTools: false },
     });
     secureWindow(printWindow);
-    await printWindow.loadFile(temporary);
+    await withTimeout(printWindow.loadFile(temporary), 45_000, '인쇄 문서 불러오기');
+    printWindow.webContents.debugger.attach('1.3');
+    await withTimeout(printWindow.webContents.debugger.sendCommand('Emulation.setEmulatedMedia', { media: 'print' }), 10_000, '인쇄 화면 전환');
     // Content scripts are disabled. This application-owned expression only
-    // waits for font loading and verifies image decode before printing.
-    await printWindow.webContents.executeJavaScriptInIsolatedWorld(999, [{ code: '(async()=>{await document.fonts.ready;await Promise.all(Array.from(document.images,image=>image.decode()))})()' }]);
+    // loads exact bundled fonts, decodes images and measures actual print bounds.
+    const preflightScript = await fs.readFile(path.join(DIST, 'print-preflight.js'), 'utf8');
+    const issues = await withTimeout(printWindow.webContents.executeJavaScriptInIsolatedWorld(999, [{ code: preflightScript }]), 45_000, '실제 글꼴·인쇄 경계 검증');
+    if (Array.isArray(issues) && issues.length) {
+      const error = new Error(`인쇄 검증 실패:\n${issues.map(issue => `[${issue.code}] ${issue.path}: ${issue.message}`).join('\n')}`);
+      error.code = 'PRINT_PREFLIGHT';
+      error.issues = issues;
+      throw error;
+    }
+    printWindow.webContents.debugger.detach();
     const pdf = await printWindow.webContents.printToPDF({ printBackground: true, pageSize: 'A4', preferCSSPageSize: true, generateTaggedPDF: true });
     await atomicWrite(path.resolve(result.filePath), pdf);
     return { path: path.resolve(result.filePath) };
@@ -203,15 +223,31 @@ function registerIPC() {
   handle('image:open', chooseImage);
   handle('document:pdf', exportPdf);
   handle('app:info', () => ({ version: app.getVersion(), platform: process.platform }));
+  handle('service:open', require('./services.cjs').openService);
 }
 
 async function createWindow() {
   mainWindow = new BrowserWindow({
     title: 'IQv2 Studio', width: 1440, height: 980, minWidth: 1050, minHeight: 700, show: !isSmoke,
     backgroundColor: '#f6f5f9', autoHideMenuBar: process.platform !== 'darwin',
+    icon: path.join(ROOT, 'assets', 'branding', 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true, devTools: !app.isPackaged },
   });
   secureWindow(mainWindow);
+  if (process.platform === 'darwin') {
+    const localMenu = Menu.getApplicationMenu();
+    mainWindow.on('focus', () => { if (localMenu) Menu.setApplicationMenu(localMenu); });
+  }
+  mainWindow.webContents.on('will-prevent-unload', (event) => {
+    const choice = dialog.showMessageBoxSync(mainWindow, {
+      type: 'question', title: '저장하지 않은 변경사항',
+      message: '저장하지 않은 변경사항이 있습니다. 닫을까요?',
+      detail: '계속 편집을 선택하면 문서를 저장할 수 있습니다.',
+      buttons: ['계속 편집', '저장하지 않고 닫기'], defaultId: 0, cancelId: 0,
+      noLink: true,
+    });
+    if (choice === 1) event.preventDefault();
+  });
   mainWindow.on('closed', () => { mainWindow = null; });
   await mainWindow.loadURL(isDev ? DEV_URL : ENTRY);
 }
@@ -253,6 +289,7 @@ if (!isSmoke && !isCli && !app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance', () => { if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.focus(); } });
   app.whenReady().then(async () => {
+    if (process.platform === 'darwin' && app.dock) app.dock.setIcon(path.join(ROOT, 'assets', 'branding', 'icon.png'));
     if (isCli) {
       const { nativeImage } = require('electron');
       const { runCli } = require('./cli-bundle.cjs');
