@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "2.0",
+  "kind": "vocab",
+  "meta": {
+    "title": "기초 영어 단어",
+    "language": "ko",
+    "vocab": {
+      "sourceLang": "en",
+      "targetLang": "ko",
+      "testDirections": ["term2meaning", "meaning2term", "definition2term"]
+    }
+  },
+  "entries": [
+    { "id": 1, "term": "cat", "meaning": ["고양이"], "definition": "a small domesticated feline" },
+    { "id": 2, "term": "dog", "meaning": ["개"], "definition": "a domesticated canine" },
+    { "id": 3, "term": "book", "meaning": ["책"], "definition": "a written work with pages" },
+    { "id": 4, "term": "tree", "meaning": ["나무"], "definition": "a tall plant with a woody trunk" },
+    { "id": 5, "term": "water", "meaning": ["물"], "definition": "a clear liquid essential for life" }
+  ]
+}

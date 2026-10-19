@@ -1,0 +1,114 @@
+name: Desktop verification and packages
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win --x64
+            artifact: windows-x64
+          - os: macos-latest
+            target: --mac --x64 --arm64
+            artifact: macos-universal-targets
+          - os: ubuntu-24.04
+            target: --linux --x64
+            artifact: linux-x64
+    runs-on: ${{ matrix.os }}
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '26'
+          cache: npm
+      - name: Install dependencies from lockfile
+        run: npm ci
+      - name: Typecheck, tests, offline assets, CLI and renderer build
+        run: npm run build && npm test
+      - name: Install Linux desktop test dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2t64 libgtk-3-0t64
+      - name: Test Electron file roundtrip, images, sandbox and both PDFs
+        if: runner.os != 'Linux'
+        run: npm run test:desktop
+      - name: Test Electron with virtual Linux display
+        if: runner.os == 'Linux'
+        run: xvfb-run -a npm run test:desktop
+      - name: Create native packages
+        run: npx electron-builder ${{ matrix.target }} --publish never
+      - name: Upload installers and portable archives
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: iqv2-${{ matrix.artifact }}
+          path: |
+            release/*.exe
+            release/*.zip
+            release/*.dmg
+            release/*.AppImage
+            release/*.deb
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: smoke-${{ matrix.artifact }}
+          path: artifacts/desktop-smoke/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: desktop
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Download every successfully verified OS package
+        uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: iqv2-*
+          path: release-assets
+          merge-multiple: true
+      - name: Publish installers and SHA-256 checksums to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from hashlib import sha256
+          root = Path('release-assets')
+          files = sorted(p for p in root.iterdir() if p.is_file())
+          if not files:
+              raise SystemExit('No installers were downloaded')
+          with (root / 'SHA256SUMS.txt').open('w', encoding='utf-8') as output:
+              for file in files:
+                  digest = sha256()
+                  with file.open('rb') as source:
+                      for chunk in iter(lambda: source.read(1024 * 1024), b''):
+                          digest.update(chunk)
+                  output.write(f'{digest.hexdigest()}  {file.name}\n')
+          PY
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --title "IQv2 Generator $RELEASE_TAG" --generate-notes --verify-tag
+          fi
+          mapfile -d '' installers < <(find release-assets -maxdepth 1 -type f -print0)
+          gh release upload "$RELEASE_TAG" "${installers[@]}" --clobber

@@ -1,0 +1,263 @@
+{
+  "schemaVersion": "2.0",
+  "kind": "exam",
+  "meta": {
+    "title": "IQv2 자료 확인 시험",
+    "subject": "자료 해석",
+    "language": "ko",
+    "mode": "exam",
+    "timeLimitSec": 600,
+    "revealPolicy": "atEnd",
+    "shuffleQuestions": false,
+    "shuffleChoices": false,
+    "exam": {
+      "kind": "mockschool",
+      "organization": "예시 학교"
+    }
+  },
+  "passages": [
+    {
+      "id": "p1",
+      "range": [
+        2,
+        2
+      ],
+      "instruction": "다음 가상 실험의 측정 결과를 보고 물음에 답하시오.",
+      "body": "동일한 조건에서 측정한 값이다. 증가율은 처음 값을 기준으로 계산한다.",
+      "media": [
+        {
+          "type": "table",
+          "headers": [
+            "시점",
+            "측정값 (g)"
+          ],
+          "rows": [
+            [
+              "처음",
+              "10"
+            ],
+            [
+              "중간",
+              "15"
+            ],
+            [
+              "마지막",
+              "20"
+            ]
+          ],
+          "caption": "가상 측정 자료"
+        },
+        {
+          "type": "graph",
+          "graphType": "bar",
+          "title": "측정값 (g)",
+          "points": [
+            {
+              "label": "처음",
+              "value": 10
+            },
+            {
+              "label": "중간",
+              "value": 15
+            },
+            {
+              "label": "마지막",
+              "value": 20
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "number": 1,
+      "points": 4,
+      "type": "단답형",
+      "prompt": "직각삼각형 ABC에서 $AB=4$, $AC=3$이고 $\\angle A=90^\\circ$이다. 변 BC의 길이를 구하시오.",
+      "media": [
+        {
+          "type": "diagram",
+          "width": 240,
+          "height": 160,
+          "caption": "삼각형 ABC",
+          "elements": [
+            {
+              "type": "polygon",
+              "points": [
+                [
+                  30,
+                  120
+                ],
+                [
+                  190,
+                  120
+                ],
+                [
+                  30,
+                  30
+                ]
+              ],
+              "fill": "none",
+              "stroke": "#111111"
+            },
+            {
+              "type": "polyline",
+              "points": [
+                [
+                  30,
+                  105
+                ],
+                [
+                  45,
+                  105
+                ],
+                [
+                  45,
+                  120
+                ]
+              ],
+              "stroke": "#111111"
+            },
+            {
+              "type": "text",
+              "x": 18,
+              "y": 138,
+              "text": "A"
+            },
+            {
+              "type": "text",
+              "x": 196,
+              "y": 138,
+              "text": "B"
+            },
+            {
+              "type": "text",
+              "x": 18,
+              "y": 20,
+              "text": "C"
+            },
+            {
+              "type": "text",
+              "x": 102,
+              "y": 142,
+              "text": "4"
+            },
+            {
+              "type": "text",
+              "x": 10,
+              "y": 78,
+              "text": "3"
+            }
+          ]
+        }
+      ],
+      "answerText": [
+        "5"
+      ],
+      "matchMode": "exact",
+      "explanation": {
+        "intent": "직각삼각형의 변의 관계 적용",
+        "correct": "피타고라스 정리에 의해 $BC^2=AB^2+AC^2=25$이고 길이는 양수이므로 $BC=5$이다.",
+        "media": [
+          {
+            "type": "math",
+            "latex": "BC=\\sqrt{4^2+3^2}=5",
+            "display": true
+          }
+        ]
+      }
+    },
+    {
+      "number": 2,
+      "passageId": "p1",
+      "points": 2.5,
+      "type": "5지선다",
+      "prompt": "처음에 비해 마지막 측정값은 몇 % 증가하였는가?",
+      "choices": [
+        "25%",
+        "50%",
+        "75%",
+        "100%",
+        "200%"
+      ],
+      "answer": 4,
+      "boxes": [
+        {
+          "label": "계산 기준",
+          "body": "증가율은 증가량을 처음 값으로 나눈 뒤 100을 곱한다."
+        }
+      ],
+      "explanation": {
+        "correct": "증가량은 10 g이고 처음 값은 10 g이므로 증가율은 $(20-10)/10\\times100=100\\%$이다.",
+        "others": [
+          "⑤ 마지막 값은 처음 값의 200%이지만 증가율은 100%이다."
+        ]
+      }
+    },
+    {
+      "number": 3,
+      "points": 1.5,
+      "type": "5지선다",
+      "prompt": "다음 중 **삼각형**을 나타내는 자료를 고르시오.",
+      "choices": [
+        "도형 A",
+        "도형 B",
+        "도형 C",
+        "도형 D",
+        "도형 E"
+      ],
+      "choiceMedia": [
+        [
+          {
+            "type": "shape",
+            "shape": "rectangle",
+            "label": "A",
+            "width": 100,
+            "height": 70
+          }
+        ],
+        [
+          {
+            "type": "shape",
+            "shape": "circle",
+            "label": "B",
+            "width": 100,
+            "height": 70
+          }
+        ],
+        [
+          {
+            "type": "shape",
+            "shape": "triangle",
+            "label": "C",
+            "width": 100,
+            "height": 70
+          }
+        ],
+        [
+          {
+            "type": "shape",
+            "shape": "line",
+            "label": "D",
+            "width": 100,
+            "height": 70
+          }
+        ],
+        [
+          {
+            "type": "shape",
+            "shape": "arrow",
+            "label": "E",
+            "width": 100,
+            "height": 70
+          }
+        ]
+      ],
+      "answer": 3,
+      "explanation": {
+        "correct": "C는 세 선분으로 둘러싸인 삼각형이다."
+      }
+    }
+  ]
+}

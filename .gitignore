@@ -1,0 +1,13 @@
+node_modules/
+dist/
+release/
+output/
+test-results/
+*.log
+.env*
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+public/render-assets.css
+electron/cli-bundle.cjs
+artifacts/

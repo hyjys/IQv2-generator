@@ -1,0 +1,98 @@
+[
+  {
+    "file": "NotoSansCJKkr-Regular.woff2",
+    "text": "骨直令葛辻漢",
+    "glyphs": {
+      "ko": [
+        45132,
+        27873,
+        9808,
+        34624,
+        40043,
+        58935
+      ],
+      "ja": [
+        45132,
+        27873,
+        9808,
+        34624,
+        40043,
+        24227
+      ],
+      "zh-Hans": [
+        45133,
+        27874,
+        9809,
+        34625,
+        40044,
+        58935
+      ],
+      "zh-Hant": [
+        45134,
+        27874,
+        9810,
+        34626,
+        40045,
+        24228
+      ],
+      "zh-HK": [
+        45132,
+        27875,
+        9810,
+        34627,
+        40045,
+        24228
+      ]
+    },
+    "engine": "uharfbuzz 0.56.3",
+    "result": "regional shaping selects distinct glyphs from the same full CJK font"
+  },
+  {
+    "file": "NotoSerifCJKkr-Regular.woff2",
+    "text": "骨直令葛辻漢",
+    "glyphs": {
+      "ko": [
+        45051,
+        27755,
+        9833,
+        34493,
+        40067,
+        58864
+      ],
+      "ja": [
+        45051,
+        27755,
+        9833,
+        34493,
+        40067,
+        24112
+      ],
+      "zh-Hans": [
+        45052,
+        27756,
+        9834,
+        34494,
+        40068,
+        58864
+      ],
+      "zh-Hant": [
+        45053,
+        27756,
+        9835,
+        34495,
+        40069,
+        24113
+      ],
+      "zh-HK": [
+        45051,
+        27757,
+        9835,
+        34496,
+        40069,
+        24113
+      ]
+    },
+    "engine": "uharfbuzz 0.56.3",
+    "result": "regional shaping selects distinct glyphs from the same full CJK font"
+  }
+]

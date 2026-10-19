@@ -1,0 +1,22 @@
+{
+  "revision": "f8d157532fbfaeda587e826d4cd5b21a49186f7c",
+  "conversion": "fontTools 4.66.0; WOFF2 lossless wrapper; full glyph sets retained",
+  "fonts": [
+    {
+      "file": "NotoSansCJKkr-Regular.woff2",
+      "family": "Noto Sans CJK KR",
+      "source": "https://raw.githubusercontent.com/notofonts/noto-cjk/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/OTF/Korean/NotoSansCJKkr-Regular.otf",
+      "sourceSha256": "6bcb2a0703aa137e874fc2dffa85f6c21ba9a67fa329e81b8c801663af7e992a",
+      "sha256": "3bfc627ae39cf80216a4a9886fbd1681bd7dfc1d5a538d7bdc1c5fddd8a37c18",
+      "bytes": 11428084
+    },
+    {
+      "file": "NotoSerifCJKkr-Regular.woff2",
+      "family": "Noto Serif CJK KR",
+      "source": "https://raw.githubusercontent.com/notofonts/noto-cjk/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Serif/OTF/Korean/NotoSerifCJKkr-Regular.otf",
+      "sourceSha256": "77b4b741f864d27f15e90f275b17106dde90b2ad28f82bab72dc95805db5fb42",
+      "sha256": "c79623565abfe26c09cd5fc35c333f8f76c9e1118de1825988c28bb142e6f232",
+      "bytes": 16718612
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+* text=auto
+src/core/vendor/*.ts -text
+src/render/vendor/* -text
+*.otf binary
+*.woff2 binary

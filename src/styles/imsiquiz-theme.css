@@ -1,0 +1,142 @@
+/*
+ * ImsiQuiz design tokens.
+ * Brand originals (#8C52FF, #FF3131) fail AA as text, so text/buttons use the
+ * measured substitutes from ImsiQuiz_Plan §8-1. No gradients (§8-2).
+ * Dark follows the OS unless an ancestor pins data-theme.
+ */
+:root {
+  color-scheme: light;
+  --iq-page: #f6f5f9;
+  --iq-surface: #ffffff;
+  --iq-surface-muted: #f1eff6;
+  --iq-surface-raised: #ffffff;
+  --iq-text: #1c1726;
+  --iq-muted: #655e71;
+  --iq-subtle: #6f687b;
+  --iq-border: #e4e0ec;
+  --iq-border-strong: #cfc8dc;
+
+  --iq-accent: #8750f2;
+  --iq-accent-text: #6a32d6;
+  --iq-accent-soft: #f1eafe;
+  --iq-button: #7b3fe4;
+  --iq-button-hover: #6a32d6;
+  --iq-brand-text: #2b0080;
+
+  --iq-correct: #0b7a3e;
+  --iq-correct-soft: #e6f6ed;
+  --iq-wrong: #c41e1e;
+  --iq-wrong-soft: #fdeceb;
+  --iq-timer: #cf2a25;
+  --iq-gold: #d4a017;
+  --iq-gold-soft: #fbf3dc;
+  --iq-gold-text: #6f5208;
+  --iq-backdrop: rgb(20 12 34 / 0.48);
+
+  --iq-shadow-sm: 0 1px 2px rgb(28 23 38 / 0.05);
+  --iq-shadow: 0 1px 2px rgb(28 23 38 / 0.04), 0 4px 16px -6px rgb(43 0 128 / 0.1);
+  --iq-shadow-lg: 0 2px 4px rgb(28 23 38 / 0.04), 0 16px 40px -12px rgb(43 0 128 / 0.2);
+
+  --iq-radius-sm: 10px;
+  --iq-radius: 14px;
+  --iq-radius-lg: 20px;
+  --iq-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --iq-page: #111016;
+    --iq-surface: #1a1921;
+    --iq-surface-muted: #222029;
+    --iq-surface-raised: #24222c;
+    --iq-text: #f2eff7;
+    --iq-muted: #b1aabc;
+    --iq-subtle: #968fa2;
+    --iq-border: #2f2c38;
+    --iq-border-strong: #45404f;
+    --iq-accent: #a97cff;
+    --iq-accent-text: #bd9bff;
+    --iq-accent-soft: #2a2140;
+    --iq-button: #7b3fe4;
+    --iq-button-hover: #8c52ff;
+    --iq-brand-text: #cdb4ff;
+    --iq-correct: #4ad386;
+    --iq-correct-soft: #15291f;
+    --iq-wrong: #ff7a7a;
+    --iq-wrong-soft: #34191b;
+    --iq-timer: #ff5b54;
+    --iq-gold-soft: #2e2612;
+    --iq-gold-text: #ecc55a;
+    --iq-backdrop: rgb(0 0 0 / 0.62);
+    --iq-shadow-sm: none;
+    --iq-shadow: 0 1px 0 rgb(255 255 255 / 0.03), 0 6px 20px -8px rgb(0 0 0 / 0.6);
+    --iq-shadow-lg: 0 1px 0 rgb(255 255 255 / 0.04), 0 20px 44px -14px rgb(0 0 0 / 0.75);
+  }
+}
+
+/* Content-kind tone: only the accent family changes inside the subtree. */
+[data-iq-mode="exam"] {
+  --iq-accent: #ff3131;
+  --iq-accent-text: #c41e1e;
+  --iq-accent-soft: #fdeceb;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-iq-mode="exam"] {
+    --iq-accent: #ff5b54;
+    --iq-accent-text: #ff8a85;
+    --iq-accent-soft: #34191b;
+  }
+}
+
+/*
+ * HAFStudy quiz flavor (Akademiya4 P14/P17) — hafs.akademiya.kr/quiz/.
+ * Same component CSS, HAFStudy palette: the Circle-Smooth blue family from
+ * gmc/src/shared/themes.css with navy brand text (crest blue & gold). Values
+ * were chosen for WCAG AA on their surfaces; no gradients, like ImsiQuiz.
+ * Declared after the ImsiQuiz blocks so equal-specificity rules win by order.
+ */
+:root[data-flavor="hafstudy"] {
+  --iq-page: #f8fafc;
+  --iq-surface: #ffffff;
+  --iq-surface-muted: #f1f5f9;
+  --iq-surface-raised: #ffffff;
+  --iq-text: #1f2937;
+  --iq-muted: #4b5563;
+  --iq-subtle: #56606e;
+  --iq-border: #e5e7eb;
+  --iq-border-strong: #cbd5e1;
+
+  --iq-accent: #2563eb;
+  --iq-accent-text: #1d4ed8;
+  --iq-accent-soft: #e8f0fe;
+  --iq-button: #2563eb;
+  --iq-button-hover: #1d4ed8;
+  --iq-brand-text: #10204f;
+  --iq-backdrop: rgb(15 23 42 / 0.48);
+
+  --iq-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.05);
+  --iq-shadow: 0 1px 3px rgb(37 99 235 / 0.08), 0 4px 16px -6px rgb(15 23 42 / 0.08);
+  --iq-shadow-lg: 0 2px 4px rgb(15 23 42 / 0.04), 0 16px 40px -12px rgb(37 99 235 / 0.22);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-flavor="hafstudy"]:not([data-theme="light"]) {
+    --iq-page: #0f172a;
+    --iq-surface: #1e293b;
+    --iq-surface-muted: #243247;
+    --iq-surface-raised: #26344a;
+    --iq-text: #f3f4f6;
+    --iq-muted: #b4bdc9;
+    --iq-subtle: #9aa4b2;
+    --iq-border: #334155;
+    --iq-border-strong: #475569;
+    --iq-accent: #60a5fa;
+    --iq-accent-text: #93c5fd;
+    --iq-accent-soft: #1e3a5f;
+    --iq-button: #2563eb;
+    --iq-button-hover: #3b82f6;
+    --iq-brand-text: #bfdbfe;
+    --iq-backdrop: rgb(0 0 0 / 0.62);
+  }
+}

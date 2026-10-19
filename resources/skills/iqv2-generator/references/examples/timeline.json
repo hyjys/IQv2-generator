@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2.0",
+  "kind": "timeline",
+  "meta": {
+    "title": "한국사 주요 사건",
+    "language": "ko",
+    "timeline": {
+      "eraLabel": "서기",
+      "modes": ["browse", "flashcard", "yearQuiz", "eventQuiz", "orderQuiz"]
+    }
+  },
+  "entries": [
+    { "id": 1, "year": "1446년", "sortKey": 1446, "yearAnswer": ["1446", "1446년"], "event": "훈민정음 반포", "category": ["문화"] },
+    { "id": 2, "year": "1945년", "sortKey": 1945, "yearAnswer": ["1945", "1945년"], "event": "광복", "category": ["현대사"] },
+    { "id": 3, "year": "1948년", "sortKey": 1948, "yearAnswer": ["1948", "1948년"], "event": "대한민국 정부 수립", "category": ["현대사"] }
+  ]
+}
